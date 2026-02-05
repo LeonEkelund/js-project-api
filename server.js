@@ -29,44 +29,80 @@ app.get("/", (req, res) => {
 
 // get all thoughts
 app.get("/thoughts", async (req, res) => {
-  const thoughts = await Thought.find()
-  res.json(thoughts)
+  try {
+    const thoughts = await Thought.find()
+    res.json(thoughts)
+  } catch (error) {
+    res.status(500).json({ error: "Could not fetch thoughts" })
+  }
 })
 
 // create a new thought
 app.post("/thoughts", async (req, res) => {
-  const { message } = req.body
-  const thought = await Thought.create({ message })
-  res.status(201).json(thought)
+  try {
+    const { message } = req.body
+    const thought = await Thought.create({ message })
+    res.status(201).json(thought)
+  } catch (error) {
+    res.status(400).json({ error: error.message })
+  }
 })
 
 // get single thought
 app.get("/thoughts/:id", async (req, res) => {
-  const { id } = req.params
-  const thought = await Thought.findById(id)
-  res.json(thought)
+  try {
+    const { id } = req.params
+    const thought = await Thought.findById(id)
+    if (!thought) {
+      return res.status(404).json({ error: "Thought not found" })
+    }
+    res.json(thought)
+  } catch (error) {
+    res.status(400).json({ error: "Invalid ID format" })
+  }
 })
 
 // update a thought
 app.put("/thoughts/:id", async (req, res) => {
-  const { id } = req.params
-  const { message } = req.body
-  const thought = await Thought.findByIdAndUpdate(id, { message }, { new: true })
-  res.json(thought)
+  try {
+    const { id } = req.params
+    const { message } = req.body
+    const thought = await Thought.findByIdAndUpdate(id, { message }, { new: true })
+    if (!thought) {
+      return res.status(404).json({ error: "Thought not found" })
+    }
+    res.json(thought)
+  } catch (error) {
+    res.status(400).json({ error: error.message })
+  }
 })
 
 // delete a thought
 app.delete("/thoughts/:id", async (req, res) => {
-  const { id } = req.params
-  await Thought.findByIdAndDelete(id)
-  res.status(204).send()
+  try {
+    const { id } = req.params
+    const thought = await Thought.findByIdAndDelete(id)
+    if (!thought) {
+      return res.status(404).json({ error: "Thought not found" })
+    }
+    res.status(204).send()
+  } catch (error) {
+    res.status(400).json({ error: "Invalid ID format" })
+  }
 })
 
 // like a thought
 app.post("/thoughts/:id/like", async (req, res) => {
-  const { id } = req.params
-  const thought = await Thought.findByIdAndUpdate(id, { $inc: { hearts: 1 } }, { new: true })
-  res.json(thought)
+  try {
+    const { id } = req.params
+    const thought = await Thought.findByIdAndUpdate(id, { $inc: { hearts: 1 } }, { new: true })
+    if (!thought) {
+      return res.status(404).json({ error: "Thought not found" })
+    }
+    res.json(thought)
+  } catch (error) {
+    res.status(400).json({ error: "Invalid ID format" })
+  }
 })
 
 // Start the server
